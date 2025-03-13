@@ -31,17 +31,7 @@ public class BookServiceImpl implements BookService {
 
     public Page<Book> searchBooks(String title, String author, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Book> books;
-        if (title != null && author != null) {
-            books = bookRepository.findByTitleContainingIgnoreCaseAndAuthorContainingIgnoreCase(title, author, pageable);
-        } else if (title != null) {
-            books = bookRepository.findByTitleContainingIgnoreCase(title, pageable);
-        } else if (author != null) {
-            books = bookRepository.findByAuthorContainingIgnoreCase(author, pageable);
-        } else {
-            books = bookRepository.findAll(pageable);
-        }
-
+        Page<Book> books = bookRepository.searchBooks(title, author, pageable);
         if (books.isEmpty()) {
             throw new ResourceNotFoundException("No books found matching the search criteria.");
         }

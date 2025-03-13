@@ -83,7 +83,7 @@ public class BorrowServiceImpl implements BorrowService {
             BookQueue queueEntry = new BookQueue(null, book, user, LocalDateTime.now());
             bookQueueRepository.save(queueEntry);
             bookQueueRepository.flush();
-            throw new IllegalStateException("No copies available. You have been added to the queue.");
+            throw new IllegalStateException("No copies available. You have been added to the queue. You'll receive an email once the book is available.");
         } else {
             throw new IllegalStateException("You are already in the queue for this book.");
         }
