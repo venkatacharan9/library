@@ -1,7 +1,6 @@
 package com.library.management.controller;
 
 import com.library.management.dto.QueueStatusDto;
-import com.library.management.entity.BookQueue;
 import com.library.management.service.QueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

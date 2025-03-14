@@ -20,8 +20,6 @@ public interface BookQueueRepository extends JpaRepository<BookQueue,Long> {
 
     Optional<BookQueue> findByBookIdAndUserId(Long bookId, Long userId);
 
-    long countByBookId(Long bookId);
-
     List<BookQueue> findByReservedUntilBefore(LocalDateTime localDateTime);
 
     List<BookQueue> findFirstNByBookIdOrderByQueuedAtAsc(Long bookId, Pageable limit);

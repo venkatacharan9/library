@@ -9,19 +9,12 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
-
-    Page<Book> findByAuthorContainingIgnoreCase(String author, Pageable pageable);
-
-    Page<Book> findByTitleContainingIgnoreCaseAndAuthorContainingIgnoreCase(String title, String author, Pageable pageable);
-
-    boolean existsByTitleAndAuthor(String title, String author);  // Check for duplicate books
+    boolean existsByTitleAndAuthor(String title, String author);
 
     @Query(value = "SELECT * FROM BOOKS b " +
             "WHERE (:title IS NULL OR LOWER(b.TITLE) LIKE LOWER(CONCAT('%', :title, '%'))) " +

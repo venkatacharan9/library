@@ -1,5 +1,4 @@
 package com.library.management.serviceImpl;
-import com.library.management.Event.BookReturnListener;
 import com.library.management.Event.EmailNotificationService;
 import com.library.management.dto.BookDto;
 import com.library.management.entity.Book;
@@ -8,7 +7,6 @@ import com.library.management.exception.ResourceAlreadyExistsException;
 import com.library.management.exception.ResourceNotFoundException;
 import com.library.management.repository.BookQueueRepository;
 import com.library.management.repository.BookRepository;
-import com.library.management.repository.UserRepository;
 import com.library.management.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
