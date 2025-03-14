@@ -4,7 +4,7 @@
 This is a Spring Boot-based **Library Management System** that allows users to borrow and return books, manage book queues, and handle late fees. The system is designed to handle concurrent access using optimistic locking and includes Flyway for database versioning and migration.
 
 ##  Setup & Installation
-    git clone 
+    git clone https://github.com/venkatacharan9/library.git
     mvn flyway:migrate (Run flyway migration)
     mvn clean install
     mvn spring-boot:run
