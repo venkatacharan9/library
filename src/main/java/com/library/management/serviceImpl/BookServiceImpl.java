@@ -1,8 +1,12 @@
 package com.library.management.serviceImpl;
+import com.library.management.Event.BookReturnListener;
+import com.library.management.Event.EmailNotificationService;
 import com.library.management.dto.BookDto;
 import com.library.management.entity.Book;
+import com.library.management.entity.BookQueue;
 import com.library.management.exception.ResourceAlreadyExistsException;
 import com.library.management.exception.ResourceNotFoundException;
+import com.library.management.repository.BookQueueRepository;
 import com.library.management.repository.BookRepository;
 import com.library.management.repository.UserRepository;
 import com.library.management.service.BookService;
@@ -10,15 +14,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
-    private final UserRepository userRepository;
+    private final BookQueueRepository bookQueueRepository;
+    private final EmailNotificationService emailNotificationService;
+
 
     public Page<Book> getAllBooks(int page, int size) {
         return bookRepository.findAll(PageRequest.of(page, size));
@@ -52,9 +61,35 @@ public class BookServiceImpl implements BookService {
     public Book updateBook(Long id, BookDto updatedBook) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book with ID " + id + " not found."));
-        BeanUtils.copyProperties(updatedBook,book);
+
+        int oldTotalCount = book.getTotalCount();
+        int oldAvailableCount = book.getAvailableCount();
+        BeanUtils.copyProperties(updatedBook, book);
+        int newTotalCount = updatedBook.getTotalCount();
+        if (newTotalCount > oldTotalCount) {
+            int increaseBy = newTotalCount - oldTotalCount;
+            book.setAvailableCount(oldAvailableCount + increaseBy);
+        } else if (newTotalCount < oldTotalCount) {
+            int decreaseBy = oldTotalCount - newTotalCount;
+            book.setAvailableCount(Math.max(oldAvailableCount - decreaseBy, 0));
+        }
+
+        if (book.getAvailableCount() > newTotalCount) {
+            book.setAvailableCount(newTotalCount);
+        }
+
+        if (book.getAvailableCount() > oldAvailableCount) {
+            Pageable pageable = PageRequest.of(0, book.getAvailableCount());
+            List<BookQueue> queuedUsers = bookQueueRepository.findFirstNByBookIdOrderByQueuedAtAsc(book.getId(), pageable);
+
+            for (BookQueue queueEntry : queuedUsers) {
+                emailNotificationService.sendQueueNotification(queueEntry.getUser().getEmail(), book.getTitle());
+            }
+        }
+
         return bookRepository.save(book);
     }
+
 
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {

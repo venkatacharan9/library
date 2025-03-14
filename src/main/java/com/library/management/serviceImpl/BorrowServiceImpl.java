@@ -1,7 +1,7 @@
 package com.library.management.serviceImpl;
 
-import com.library.management.Event.BookReturnListener;
 import com.library.management.Event.BookReturnedEvent;
+import com.library.management.Event.EmailNotificationService;
 import com.library.management.entity.Book;
 import com.library.management.entity.BookQueue;
 import com.library.management.entity.BorrowRecord;
@@ -25,34 +25,38 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class BorrowServiceImpl implements BorrowService {
+public class  BorrowServiceImpl implements BorrowService {
 
     @Value("${library.lateFee.first10days:0}")
     private double first10DaysFee;
 
-    @Value("${library.lateFee.next10days:2}")
+    @Value("${library.lateFee.next10days}")
     private double next10DaysFee;
 
-    @Value("${library.lateFee.after20days:5}")
+    @Value("${library.lateFee.after20days}")
     private double after20DaysFee;
 
-    @Value("${library.lateFee.after30days:10}")
+    @Value("${library.lateFee.after30days}")
     private double after30DaysFee;
+
+    @Value("${reservationDays}")
+    private Long reservationDays;
 
 
     private final BookRepository bookRepository;
     private final BorrowRecordRepository borrowRecordRepository;
     private final UserRepository userRepository;
     private final BookQueueRepository bookQueueRepository;
-    private final BookReturnListener bookReturnListener;
+    private final EmailNotificationService emailNotificationService;
+
 
 
     private final ApplicationEventPublisher eventPublisher;
-
 
     @Transactional(noRollbackFor = IllegalStateException.class)
     public BorrowRecord borrowBook(Long bookId, Long userId) {
@@ -62,32 +66,59 @@ public class BorrowServiceImpl implements BorrowService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        BorrowRecord borrowRecord= borrowRecordRepository.findByBookIdAndUserIdAndReturnedAtIsNull(bookId,userId);
-
-        if(borrowRecord!=null){
-            throw new ResourceAlreadyExistsException("You already borrowed this book and not returned yet");
+        BorrowRecord existingBorrow = borrowRecordRepository.findByBookIdAndUserIdAndReturnedAtIsNull(bookId, userId);
+        if (existingBorrow != null) {
+            throw new ResourceAlreadyExistsException("You already borrowed this book and not returned yet.");
         }
-        if (book.getAvailableCount() >0) {
-
-            book.setAvailableCount(book.getAvailableCount() - 1);
-            bookRepository.save(book);
-
-            borrowRecord = new BorrowRecord();
-            borrowRecord.setBook(book);
-            borrowRecord.setUser(user);
-            borrowRecord.setBorrowedAt(LocalDateTime.now());
-
-            return borrowRecordRepository.save(borrowRecord);
-        }
-        if (!bookQueueRepository.existsByBookIdAndUserId(book.getId(), user.getId())) {
-            BookQueue queueEntry = new BookQueue(null, book, user, LocalDateTime.now());
-            bookQueueRepository.save(queueEntry);
-            bookQueueRepository.flush();
-            throw new IllegalStateException("No copies available. You have been added to the queue. You'll receive an email once the book is available.");
+        List<BookQueue> bookQueues = bookQueueRepository.findByBookIdOrderByQueuedAtAsc(bookId);
+        if (bookQueues.size() >= book.getAvailableCount()) {
+            boolean userEligible = isUserEligibleForBorrow(bookQueues, user.getId(), book.getAvailableCount());
+            if (!userEligible) {
+                if (!bookQueueRepository.existsByBookIdAndUserId(book.getId(), user.getId())) {
+                    BookQueue queueEntry = new BookQueue(null, book, user, LocalDateTime.now(), LocalDateTime.now().plusDays(reservationDays));
+                    bookQueueRepository.save(queueEntry);
+                    throw new IllegalStateException("No copies available. You have been added to the queue.");
+                } else {
+                    throw new IllegalStateException("You are already in the queue for this book.");
+                }
+            } else {
+                return processBorrowFromQueue(book, user);
+            }
         } else {
-            throw new IllegalStateException("You are already in the queue for this book.");
+            return borrowBookFromAvailable(book, user);
         }
+    }
 
+    private boolean isUserEligibleForBorrow(List<BookQueue> bookQueues, Long userId, int availableCount) {
+        for (int i = 0; i < availableCount; i++) {
+            BookQueue queueEntry = bookQueues.get(i);
+            if (queueEntry.getUser().getId().equals(userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private BorrowRecord processBorrowFromQueue(Book book, User user) {
+        BorrowRecord borrowRecord = this.borrowBookFromAvailable(book, user);
+        BookQueue userQueue = bookQueueRepository.findByBookIdAndUserId(book.getId(), user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found in queue"));
+        bookQueueRepository.delete(userQueue);
+        return borrowRecord;
+    }
+
+    private BorrowRecord borrowBookFromAvailable(Book book, User user) {
+        book = bookRepository.findByIdAndLock(book.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found"));
+        book.setAvailableCount(book.getAvailableCount() - 1);
+        bookRepository.save(book);
+
+        BorrowRecord borrowRecord = new BorrowRecord();
+        borrowRecord.setBook(book);
+        borrowRecord.setUser(user);
+        borrowRecord.setBorrowedAt(LocalDateTime.now());
+        return borrowRecordRepository.save(borrowRecord);
     }
 
     @Transactional
@@ -114,10 +145,7 @@ public class BorrowServiceImpl implements BorrowService {
         Optional<BookQueue> nextUserQueue = bookQueueRepository.findFirstByBookIdOrderByQueuedAtAsc(book.getId());
         if (nextUserQueue.isPresent()) {
             BookQueue nextUser = nextUserQueue.get();
-
-         bookReturnListener.sendQueueNotification(nextUser.getUser().getEmail(), book.getTitle());
-
-            bookQueueRepository.delete(nextUser);
+            emailNotificationService.sendQueueNotification(nextUser.getUser().getEmail(), book.getTitle());
         }
 
         return borrowRecord;
@@ -137,7 +165,6 @@ public class BorrowServiceImpl implements BorrowService {
                 fee = (10 * next10DaysFee) + (10 * after20DaysFee) + ((lateDays - 20) * after30DaysFee);
             }
         }
-
         return fee;
     }
 

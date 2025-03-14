@@ -2,7 +2,6 @@ package com.library.management.serviceImpl;
 
 import com.library.management.dto.QueueStatusDto;
 import com.library.management.entity.BookQueue;
-import com.library.management.entity.User;
 import com.library.management.exception.ResourceNotFoundException;
 import com.library.management.repository.BookQueueRepository;
 import com.library.management.repository.UserRepository;
@@ -28,7 +27,7 @@ public class QueueServiceImpl implements QueueService {
         int position = 1;
         for (BookQueue entry : queue) {
             if (entry.getUser().getId().equals(userId)) {
-                return new QueueStatusDto(position, queue.size());
+                return new QueueStatusDto(entry.getUser().getId(),entry.getUser().getName(),position, queue.size());
             }
             position++;
         }
@@ -49,7 +48,7 @@ public class QueueServiceImpl implements QueueService {
         return bookQueueRepository.findByBookIdOrderByQueuedAtAsc(bookId).stream()
                 .map(entry -> new QueueStatusDto(
                         entry.getUser().getId(),
-                        entry.getUser().getEmail(),
+                        entry.getUser().getName(),
                         entry.getQueuedAt()
                 ))
                 .collect(Collectors.toList());

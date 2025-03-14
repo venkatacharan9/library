@@ -17,7 +17,6 @@ public class QueueController {
 
     private final QueueService queueService;
 
-    // 1. Get user queue position
     @GetMapping("/status/{bookId}")
     public ResponseEntity<QueueStatusDto> getQueueStatus(@PathVariable Long bookId,
                                                          @RequestParam Long userId) {
@@ -25,7 +24,6 @@ public class QueueController {
         return ResponseEntity.ok(status);
     }
 
-    // 2. Cancel queue position
     @DeleteMapping("/cancel/{bookId}")
     public ResponseEntity<Void> cancelQueuePosition(@PathVariable Long bookId,
                                                     @RequestParam Long userId) {
@@ -33,7 +31,6 @@ public class QueueController {
         return ResponseEntity.noContent().build();
     }
 
-    // 3. Get full queue (for Admin/Owner)
     @PreAuthorize("hasAuthority('OWNER')")
     @GetMapping("/{bookId}")
     public ResponseEntity<List<QueueStatusDto>> getFullQueue(@PathVariable Long bookId) {
@@ -41,7 +38,6 @@ public class QueueController {
         return ResponseEntity.ok(queue);
     }
 
-    // 4. Reorder queue (for Admin/Owner)
     @PreAuthorize("hasAuthority('OWNER')")
     @PutMapping("/reorder/{bookId}")
     public ResponseEntity<Void> reorderQueue(@PathVariable Long bookId,

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
     private final BookService bookService;
 
-
     @GetMapping
     public ResponseEntity<Page<Book>> getAllBooks(
             @RequestParam(defaultValue = "0") int page,
@@ -45,7 +44,7 @@ public class BookController {
 
     @PreAuthorize("hasAuthority('OWNER')")
     @PutMapping("updateBook/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody BookDto book) {
+    public ResponseEntity<Book> updateBook(@PathVariable Long id,@Valid @RequestBody BookDto book) {
         return ResponseEntity.ok(bookService.updateBook(id, book));
     }
 

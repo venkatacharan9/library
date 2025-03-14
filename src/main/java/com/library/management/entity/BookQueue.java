@@ -27,4 +27,7 @@ public class BookQueue {
 
     @Column(nullable = false)
     private LocalDateTime queuedAt;
+
+    @Column(nullable = false)
+    private LocalDateTime reservedUntil;
 }

@@ -10,17 +10,17 @@ import com.library.management.service.BorrowService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
 import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class BorrowServiceImplTest {
 
@@ -45,7 +45,6 @@ public class BorrowServiceImplTest {
         bookRepository.deleteAll();
         userRepository.deleteAll();
 
-        // Set test book and user
         testBook = new Book();
         testBook.setTitle("Test Book");
         testBook.setAuthor("Test Author");
@@ -55,6 +54,7 @@ public class BorrowServiceImplTest {
 
         testUser = new User();
         testUser.setEmail("testuser@example.com");
+        testUser.setName("test");
         testUser.setPassword("randomKey");
         userRepository.save(testUser);
     }
@@ -94,6 +94,7 @@ public class BorrowServiceImplTest {
 
         User anotherUser = new User();
         anotherUser.setEmail("anotheruser@example.com");
+        anotherUser.setName("anotheruser");
         anotherUser.setPassword("randomKey");
         userRepository.save(anotherUser);
 
