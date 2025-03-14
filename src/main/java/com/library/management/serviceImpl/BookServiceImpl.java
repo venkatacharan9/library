@@ -13,9 +13,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,9 +39,9 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new ResourceNotFoundException("Book with ID " + id + " not found."));
     }
 
-    public Page<Book> searchBooks(String title, String author, int page, int size) {
+    public Page<Book> searchBooks(String title, String author,String anyType, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Book> books = bookRepository.searchBooks(title, author, pageable);
+        Page<Book> books = bookRepository.searchBooks(title, author,anyType, pageable);
         if (books.isEmpty()) {
             throw new ResourceNotFoundException("No books found matching the search criteria.");
         }
@@ -52,6 +55,9 @@ public class BookServiceImpl implements BookService {
         }
         Book book= new Book();
         BeanUtils.copyProperties(bookDto,book);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        book.setCreatedBy(authentication.getName());
+        book.setCreatedDate(LocalDateTime.now());
         return bookRepository.save(book);
     }
 
@@ -87,6 +93,10 @@ public class BookServiceImpl implements BookService {
                 emailNotificationService.sendQueueNotification(queueEntry.getUser().getEmail(), book.getTitle());
             }
         }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        book.setUpdatedBy(authentication.getName());
+        book.setUpdatedDate(LocalDateTime.now());
 
         return bookRepository.save(book);
     }

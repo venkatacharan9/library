@@ -3,6 +3,8 @@ package com.library.management.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity()
 @Table(name = "books", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"title", "author"})
@@ -20,6 +22,10 @@ public class Book {
     private Integer availableCount;
     @Version
     private Integer version;
+    private String createdBy;
+    private LocalDateTime createdDate;
+    private String updatedBy;
+    private LocalDateTime updatedDate;
 
     @PrePersist
     public void prePersist() {

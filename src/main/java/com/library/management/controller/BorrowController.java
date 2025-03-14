@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BorrowController {
 
-    @Autowired
-    private BorrowService borrowService;
+    private final BorrowService borrowService;
 
     @PostMapping("borrow/{bookId}")
     public ResponseEntity<BorrowRecord> borrowBook(

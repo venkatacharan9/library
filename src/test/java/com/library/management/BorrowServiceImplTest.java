@@ -50,6 +50,7 @@ public class BorrowServiceImplTest {
         testBook.setAuthor("Test Author");
         testBook.setAvailableCount(5);
         testBook.setTotalCount(10);
+        testBook.setCreatedBy("Test");
         bookRepository.save(testBook);
 
         testUser = new User();

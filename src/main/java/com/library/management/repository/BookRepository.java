@@ -17,11 +17,18 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     boolean existsByTitleAndAuthor(String title, String author);
 
     @Query(value = "SELECT * FROM BOOKS b " +
-            "WHERE (:title IS NULL OR LOWER(b.TITLE) LIKE LOWER(CONCAT('%', :title, '%'))) " +
-            "AND (:author IS NULL OR LOWER(b.AUTHOR) LIKE LOWER(CONCAT('%', :author, '%')))",
+            "WHERE " +
+            " (:title IS NULL OR LOWER(b.TITLE) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
+            " (:author IS NULL OR LOWER(b.AUTHOR) LIKE LOWER(CONCAT('%', :author, '%'))) AND " +
+            " (" +
+            " :anyType IS NULL OR " +
+            "  LOWER(b.TITLE) LIKE LOWER(CONCAT('%', :anyType, '%')) OR " +
+            "  LOWER(b.AUTHOR) LIKE LOWER(CONCAT('%', :anyType, '%')) " +
+            "  )",
             nativeQuery = true)
     Page<Book> searchBooks(@Param("title") String title,
                            @Param("author") String author,
+                           @Param("anyType") String anyType,
                            Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

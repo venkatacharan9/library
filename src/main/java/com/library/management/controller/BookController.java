@@ -31,9 +31,10 @@ public class BookController {
     @GetMapping("/search")
     public Page<Book> searchBooks(@RequestParam(required = false) String title,
                                   @RequestParam(required = false) String author,
+                                  @RequestParam(required = false) String anyType,
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "10") int size) {
-        return bookService.searchBooks(title, author,page,size);
+        return bookService.searchBooks(title, author,anyType,page,size);
     }
 
     @PreAuthorize("hasAuthority('OWNER')")

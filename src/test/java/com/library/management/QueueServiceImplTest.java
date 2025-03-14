@@ -55,6 +55,7 @@ public class QueueServiceImplTest {
         testBook.setAuthor("Test Author");
         testBook.setAvailableCount(0);
         testBook.setTotalCount(5);
+        testBook.setCreatedBy("Test");
         bookRepository.save(testBook);
 
         user1 = new User();

@@ -4,6 +4,7 @@ import com.library.management.dto.JwtResponse;
 import com.library.management.dto.LoginDto;
 import com.library.management.service.AuthService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
