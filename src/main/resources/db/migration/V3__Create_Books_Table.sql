@@ -4,5 +4,6 @@ CREATE TABLE books (
     author VARCHAR(255) NOT NULL,
     total_count INT NOT NULL,
     available_count INT NOT NULL,
+    version INT NULL,
     CONSTRAINT unique_book UNIQUE (title, author)
 );

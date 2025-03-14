@@ -79,7 +79,10 @@ public class BookServiceImpl implements BookService {
         }
 
         if (book.getAvailableCount() > oldAvailableCount) {
-            Pageable pageable = PageRequest.of(0, book.getAvailableCount());
+            int pageSize=book.getAvailableCount();
+            if(pageSize>5)
+                pageSize=5;
+            Pageable pageable = PageRequest.of(0, pageSize);
             List<BookQueue> queuedUsers = bookQueueRepository.findFirstNByBookIdOrderByQueuedAtAsc(book.getId(), pageable);
 
             for (BookQueue queueEntry : queuedUsers) {

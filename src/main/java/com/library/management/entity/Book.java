@@ -18,6 +18,8 @@ public class Book {
     private String author;
     private Integer totalCount;
     private Integer availableCount;
+    @Version
+    private Integer version;
 
     @PrePersist
     public void prePersist() {
