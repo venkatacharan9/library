@@ -8,6 +8,7 @@ This is a Spring Boot-based **Library Management System** that allows users to b
     mvn flyway:migrate (Run flyway migration)
     mvn clean install
     mvn spring-boot:run
+    [ Download Postman Collection] https://github.com/venkatacharan9/library/blob/master/postman/LibraryManagementSystem.postman_collection.jso
     
 
 ##  Features
