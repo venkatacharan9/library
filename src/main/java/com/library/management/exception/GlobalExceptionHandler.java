@@ -1,9 +1,8 @@
 package com.library.management.exception;
 
-import com.library.management.dto.ApiErrorDto;
-import jakarta.servlet.http.HttpServletRequest;
+import com.library.management.dto.ErrorDetailsDto;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -19,23 +18,27 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<ErrorDetailsDto> handleResourceNotFound(ResourceNotFoundException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorDetailsDto);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<String> handleBadRequest(BadRequestException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    public ResponseEntity<ErrorDetailsDto> handleBadRequest(BadRequestException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDetailsDto);
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<String> handleResourceAlreadyExists(ResourceAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    public ResponseEntity<ErrorDetailsDto> handleResourceAlreadyExists(ResourceAlreadyExistsException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.CONFLICT.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorDetailsDto);
     }
 
-    @ExceptionHandler(Exception.class)  // Catch all unexpected errors
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + ex.getMessage());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDetailsDto> handleGeneralException(Exception ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorDetailsDto);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -57,33 +60,38 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             org.springframework.security.authorization.AuthorizationDeniedException.class,
             org.springframework.security.access.AccessDeniedException.class})
-    public ResponseEntity<ApiErrorDto> handlerForbiddenException(HttpServletRequest request,
-                                                                 RuntimeException ex) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new ApiErrorDto(
-                        LocalDateTime.now(),
-                        request.getRequestURI(),
-                        request.getMethod(),
-                        HttpStatus.FORBIDDEN.value(),
-                        HttpStatus.FORBIDDEN.getReasonPhrase(),
-                        ex.getMessage(),
-                        null,
-                        ex.getClass()
-                ));
+    public ResponseEntity<ErrorDetailsDto> handleForbiddenException(Exception ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorDetailsDto);
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalStateException(IllegalStateException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Illegal State");
-        response.put("message", ex.getMessage());
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorDetailsDto> handleIllegalStateException(IllegalStateException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDetailsDto);
     }
 
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ErrorDetailsDto> handleNullPointerException(NullPointerException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "A null pointer exception occurred: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorDetailsDto);
+    }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDetailsDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), "Invalid argument: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDetailsDto);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorDetailsDto> handleConstraintViolationException(ConstraintViolationException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), "Constraint violation: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorDetailsDto);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorDetailsDto> handleRuntimeException(RuntimeException ex) {
+        ErrorDetailsDto ErrorDetailsDto = new ErrorDetailsDto(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "Runtime exception: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorDetailsDto);
+    }
 }
