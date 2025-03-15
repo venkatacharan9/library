@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class BookDto {
@@ -19,5 +21,13 @@ public class BookDto {
     @NotNull(message = "Count cannot be null")
     @Min(value = 1, message = "There must be at least 1 book available")
     private Integer totalCount;
+
+    private String createdBy;
+    private LocalDateTime createdDate;
+    private String updatedBy;
+    private LocalDateTime updatedDate;
+
+
+
 
 }

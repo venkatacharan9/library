@@ -56,6 +56,7 @@ public class QueueServiceImplTest {
         testBook.setAvailableCount(0);
         testBook.setTotalCount(5);
         testBook.setCreatedBy("Test");
+        testBook.setCreatedDate(LocalDateTime.now());
         bookRepository.save(testBook);
 
         user1 = new User();

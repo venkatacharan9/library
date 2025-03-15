@@ -31,6 +31,7 @@ public class BookServiceImpl implements BookService {
 
 
     public Page<Book> getAllBooks(int page, int size) {
+
         return bookRepository.findAll(PageRequest.of(page, size));
     }
 
@@ -56,6 +57,7 @@ public class BookServiceImpl implements BookService {
         Book book= new Book();
         BeanUtils.copyProperties(bookDto,book);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication!=null)
         book.setCreatedBy(authentication.getName());
         book.setCreatedDate(LocalDateTime.now());
         return bookRepository.save(book);
@@ -95,6 +97,7 @@ public class BookServiceImpl implements BookService {
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication!=null)
         book.setUpdatedBy(authentication.getName());
         book.setUpdatedDate(LocalDateTime.now());
 
