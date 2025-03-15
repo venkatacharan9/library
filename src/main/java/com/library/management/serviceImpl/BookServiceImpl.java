@@ -10,6 +10,7 @@ import com.library.management.repository.BookRepository;
 import com.library.management.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll(PageRequest.of(page, size));
     }
 
+    @Cacheable(value = "books", key = "#id")
     public Book getBookById(Long id) {
         return bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book with ID " + id + " not found."));
@@ -57,8 +59,7 @@ public class BookServiceImpl implements BookService {
         Book book= new Book();
         BeanUtils.copyProperties(bookDto,book);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null)
-        book.setCreatedBy(authentication.getName());
+        if(authentication!=null) book.setCreatedBy(authentication.getName());
         book.setCreatedDate(LocalDateTime.now());
         return bookRepository.save(book);
     }
@@ -97,8 +98,7 @@ public class BookServiceImpl implements BookService {
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null)
-        book.setUpdatedBy(authentication.getName());
+        if(authentication!=null) book.setUpdatedBy(authentication.getName());
         book.setUpdatedDate(LocalDateTime.now());
 
         return bookRepository.save(book);
