@@ -77,9 +77,9 @@ public class QueueServiceImplTest {
         user3.setPassword("password3");
         userRepository.save(user3);
 
-        bookQueueRepository.save(new BookQueue(null, testBook, user1, LocalDateTime.now(),LocalDateTime.now().plusDays(2)));
-        bookQueueRepository.save(new BookQueue(null, testBook, user2, LocalDateTime.now().plusSeconds(10),LocalDateTime.now().plusDays(3)));
-        bookQueueRepository.save(new BookQueue(null, testBook, user3, LocalDateTime.now().plusSeconds(20),LocalDateTime.now().plusDays(3)));
+        bookQueueRepository.save(new BookQueue(null, testBook, user1, LocalDateTime.now(),LocalDateTime.now().plusDays(2),false));
+        bookQueueRepository.save(new BookQueue(null, testBook, user2, LocalDateTime.now().plusSeconds(10),LocalDateTime.now().plusDays(3),false));
+        bookQueueRepository.save(new BookQueue(null, testBook, user3, LocalDateTime.now().plusSeconds(20),LocalDateTime.now().plusDays(3),false));
     }
 
     @Test

@@ -30,4 +30,7 @@ public class BookQueue {
 
     @Column(nullable = false)
     private LocalDateTime reservedUntil;
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean notified;
 }

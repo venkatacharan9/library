@@ -3,6 +3,7 @@ package com.library.management.repository;
 import com.library.management.entity.BookQueue;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -23,5 +24,8 @@ public interface BookQueueRepository extends JpaRepository<BookQueue,Long> {
     List<BookQueue> findByReservedUntilBefore(LocalDateTime localDateTime);
 
     List<BookQueue> findFirstNByBookIdOrderByQueuedAtAsc(Long bookId, Pageable limit);
+
+    @Query("SELECT bq FROM BookQueue bq WHERE bq.notified = false ORDER BY bq.queuedAt ASC")
+    List<BookQueue> findPendingNotifications();
 
 }

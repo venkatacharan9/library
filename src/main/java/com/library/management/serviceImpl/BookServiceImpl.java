@@ -85,18 +85,6 @@ public class BookServiceImpl implements BookService {
             book.setAvailableCount(newTotalCount);
         }
 
-        if (book.getAvailableCount() > oldAvailableCount) {
-            int pageSize=book.getAvailableCount();
-            if(pageSize>5)
-                pageSize=5;
-            Pageable pageable = PageRequest.of(0, pageSize);
-            List<BookQueue> queuedUsers = bookQueueRepository.findFirstNByBookIdOrderByQueuedAtAsc(book.getId(), pageable);
-
-            for (BookQueue queueEntry : queuedUsers) {
-                emailNotificationService.sendQueueNotification(queueEntry.getUser().getEmail(), book.getTitle());
-            }
-        }
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication!=null) book.setUpdatedBy(authentication.getName());
         book.setUpdatedDate(LocalDateTime.now());

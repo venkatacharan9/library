@@ -75,7 +75,7 @@ public class  BorrowServiceImpl implements BorrowService {
             boolean userEligible = isUserEligibleForBorrow(bookQueues, user.getId(), book.getAvailableCount());
             if (!userEligible) {
                 if (!bookQueueRepository.existsByBookIdAndUserId(book.getId(), user.getId())) {
-                    BookQueue queueEntry = new BookQueue(null, book, user, LocalDateTime.now(), LocalDateTime.now().plusDays(reservationDays));
+                    BookQueue queueEntry = new BookQueue(null, book, user, LocalDateTime.now(), LocalDateTime.now().plusDays(reservationDays),false);
                     bookQueueRepository.save(queueEntry);
                     throw new IllegalStateException("No copies available. You have been added to the queue.");
                 } else {
