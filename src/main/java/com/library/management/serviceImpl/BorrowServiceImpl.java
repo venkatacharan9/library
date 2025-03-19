@@ -146,6 +146,7 @@ public class  BorrowServiceImpl implements BorrowService {
         if (nextUserQueue.isPresent()) {
             BookQueue nextUser = nextUserQueue.get();
             emailNotificationService.sendQueueNotification(nextUser.getUser().getEmail(), book.getTitle());
+            nextUser.setNotified(true);
         }
 
         return borrowRecord;
