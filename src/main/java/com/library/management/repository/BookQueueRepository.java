@@ -15,7 +15,7 @@ public interface BookQueueRepository extends JpaRepository<BookQueue,Long> {
 
     boolean existsByBookIdAndUserId(Long bookId,Long userId);
 
-    Optional<BookQueue> findFirstByBookIdOrderByQueuedAtAsc(Long bookId);
+    Optional<BookQueue> findFirstByBookIdAndNotifiedFalseOrderByQueuedAtAsc(Long bookId);
 
     List<BookQueue> findByBookIdOrderByQueuedAtAsc(Long bookId);
 

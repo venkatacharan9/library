@@ -142,7 +142,7 @@ public class  BorrowServiceImpl implements BorrowService {
 
         eventPublisher.publishEvent(new BookReturnedEvent(this, borrowRecord));
 
-        Optional<BookQueue> nextUserQueue = bookQueueRepository.findFirstByBookIdOrderByQueuedAtAsc(book.getId());
+        Optional<BookQueue> nextUserQueue = bookQueueRepository.findFirstByBookIdAndNotifiedFalseOrderByQueuedAtAsc(book.getId());
         if (nextUserQueue.isPresent()) {
             BookQueue nextUser = nextUserQueue.get();
             emailNotificationService.sendQueueNotification(nextUser.getUser().getEmail(), book.getTitle());
