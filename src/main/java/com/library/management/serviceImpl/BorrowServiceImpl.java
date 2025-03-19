@@ -140,7 +140,7 @@ public class  BorrowServiceImpl implements BorrowService {
         book.setAvailableCount(book.getAvailableCount() + 1);
         bookRepository.save(book);
 
-        eventPublisher.publishEvent(new BookReturnedEvent(this, borrowRecord));
+        eventPublisher.publishEvent(new BookReturnedEvent(borrowRecord));
 
         Optional<BookQueue> nextUserQueue = bookQueueRepository.findFirstByBookIdAndNotifiedFalseOrderByQueuedAtAsc(book.getId());
         if (nextUserQueue.isPresent()) {

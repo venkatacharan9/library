@@ -1,4 +1,5 @@
 package com.library.management.serviceImpl;
+import com.library.management.Event.BookUpdatedEvent;
 import com.library.management.Event.EmailNotificationService;
 import com.library.management.dto.BookDto;
 import com.library.management.entity.Book;
@@ -11,6 +12,7 @@ import com.library.management.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookQueueRepository bookQueueRepository;
     private final EmailNotificationService emailNotificationService;
+    private final ApplicationEventPublisher eventPublisher;
+
 
 
     public Page<Book> getAllBooks(int page, int size) {
@@ -83,6 +87,10 @@ public class BookServiceImpl implements BookService {
 
         if (book.getAvailableCount() > newTotalCount) {
             book.setAvailableCount(newTotalCount);
+        }
+
+        if (book.getAvailableCount() > oldAvailableCount) {
+            eventPublisher.publishEvent(new BookUpdatedEvent(book.getId(), book.getAvailableCount()));
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
