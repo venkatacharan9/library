@@ -3,6 +3,9 @@
 
 This is a Spring Boot-based **Library Management System** that allows users to borrow and return books, manage book queues, and handle late fees. The system is designed to handle concurrent access using optimistic locking and includes Flyway for database versioning and migration.
 
+# Kakfa
+We can switch to Kafka for handling notifications to make it faster and more scalable. Kafka can handle large amounts of data efficiently and process notifications without slowing down the main service, even when there's a lot of traffic.
+
 ##  Setup & Installation
     git clone https://github.com/venkatacharan9/library.git
     mvn flyway:migrate (Run flyway migration)
